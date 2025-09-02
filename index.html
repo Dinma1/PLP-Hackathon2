@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplify - Complex Topics Made Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .search-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        #topicInput {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #topicInput:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        #topicInput::placeholder {
+            color: var(--text-muted);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .explanation {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            animation: fadeInScale 0.6s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .explanation-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .explanation-content {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .info-cards {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .card-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .examples-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .example-item {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        .quick-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .topic-chip {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .topic-chip:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .tagline {
+                font-size: 1.125rem;
+            }
+            
+            .search-section {
+                padding: 1.5rem;
+            }
+        }
+
+        .error-state {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .success-state {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span>🧠</span>
+                Simplify
+            </div>
+            <h1 class="tagline">Complex Topics Made Simple</h1>
+            <p class="description">Get clear, easy-to-understand explanations for any topic</p>
+            
+            <div class="quick-topics">
+                <span class="topic-chip" onclick="setTopic('quantum physics')">Quantum Physics</span>
+                <span class="topic-chip" onclick="setTopic('machine learning')">Machine Learning</span>
+                <span class="topic-chip" onclick="setTopic('blockchain')">Blockchain</span>
+                <span class="topic-chip" onclick="setTopic('climate change')">Climate Change</span>
+                <span class="topic-chip" onclick="setTopic('photosynthesis')">Photosynthesis</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="input-group">
+                    <label for="topicInput" class="input-label">What would you like to understand?</label>
+                    <input 
+                        type="text" 
+                        id="topicInput" 
+                        placeholder="e.g., How does the internet work?, What is DNA?, Why do we age?"
+                        maxlength="200"
+                    >
+                </div>
+                <button class="submit-button" onclick="explainTopic()" id="submitBtn">
+                    <span id="buttonText">✨ Get Simple Explanation</span>
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Crafting your explanation...</p>
+            </div>
+
+            <div class="explanation" id="explanation">
+                <!-- Explanation content will be inserted here -->
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>Making complex ideas accessible to everyone</p>
+    </footer>
+
+    <script>
+        // Configuration - You can move the API key to a separate config file
+        const CONFIG = {
+            // For production, you'd want to hide this API key on a server
+            // For now, consider it a demo key that you should replace
+            geminiApiKey: 'AIzaSyAPZXQGsFg9qlcQc3xsHJZht30yWqqn6I8', // Replace with your actual key
+            maxRetries: 2
+        };
+
+        async function getGeminiExplanation(topic) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.geminiApiKey}`;
+
+            const prompt = `You are an expert at explaining complex topics in simple, accessible language. 
+
+Topic: "${topic}"
+
+Please provide a clear, engaging explanation that:
+1. Uses simple language but isn't childish - suitable for curious adults
+2. Includes relatable analogies and real-world examples
+3. Explains the core concept and why it matters
+4. Is informative yet easy to understand
+5. Avoids unnecessary jargon (or explains it when needed)
+
+Structure your response as:
+- Main explanation (2-3 paragraphs)
+- Why it matters (1 paragraph)
+- Real-world examples or applications
+
+Keep it conversational and engaging, around 150-200 words total.`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 300,
+                    topK: 40,
+                    topP: 0.9
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Gemini API error:', response.status, errorText);
+                    return null;
+                }
+
+                const data = await response.json();
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+                
+                return null;
+
+            } catch (error) {
+                console.error('Error fetching from Gemini API:', error);
+                return null;
+            }
+        }
+
+        function getFallbackExplanation(topic) {
+            const explanations = {
+                "quantum physics": {
+                    main: "Quantum physics is the science of the incredibly tiny - smaller than atoms. At this scale, particles behave in ways that seem magical compared to our everyday experience. Think of it like this: if regular physics is like watching people walk through doors, quantum physics is like discovering those people can walk through walls, be in two rooms at once, or instantly appear somewhere else entirely.",
+                    why: "Understanding quantum physics has led to incredible technologies like lasers, MRI machines, and computer chips. It's helping us develop quantum computers that could solve problems in minutes that would take regular computers thousands of years.",
+                    examples: "You use quantum physics every day without knowing it - in LED lights, solar panels, and even the GPS in your phone that needs quantum-precise timing to work accurately."
+                },
+                "machine learning": {
+                    main: "Machine learning is like teaching a computer to recognize patterns and make decisions, similar to how you learned to recognize faces or ride a bike. Instead of programming every possible scenario, we show the computer thousands of examples and let it figure out the patterns on its own.",
+                    why: "This technology powers many things you use daily - it helps Netflix recommend movies, enables voice assistants to understand you, and helps doctors analyze medical scans more accurately.",
+                    examples: "When your email automatically sorts spam, when your camera recognizes faces for tagging, or when streaming services suggest what to watch next - that's machine learning working behind the scenes."
+                },
+                "blockchain": {
+                    main: "Blockchain is like a special notebook that everyone has a copy of, and once something is written in it, it can't be erased or changed without everyone agreeing. Each page (block) is connected to the previous page with a special code, creating a chain of information that's very hard to fake.",
+                    why: "This creates trust without needing a central authority like a bank. It enables secure digital transactions and could revolutionize how we handle contracts, voting, and data ownership.",
+                    examples: "Bitcoin uses blockchain to track digital money, some companies use it to verify product authenticity, and it could help create tamper-proof voting systems or medical records."
+                }
+            };
+
+            const defaultExplanation = {
+                main: `${topic} is a fascinating subject that connects to many aspects of our world. Like most complex topics, it has layers of understanding - from basic concepts that anyone can grasp to intricate details that experts spend years studying. The key is starting with the fundamental ideas and building up from there.`,
+                why: `Understanding ${topic} helps us make sense of the world around us and can influence how we think about related concepts. Knowledge builds on itself, so grasping the basics of ${topic} often opens doors to understanding other interesting subjects.`,
+                examples: `You might encounter aspects of ${topic} in daily life, news, technology, or other fields of study. Recognizing these connections helps you see how different areas of knowledge relate to each other.`
+            };
+
+            return explanations[topic.toLowerCase()] || defaultExplanation;
+        }
+
+        async function explainTopic() {
+            const input = document.getElementById('topicInput');
+            const topic = input.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!topic) {
+                showError('Please enter a topic you\'d like to understand!');
+                return;
+            }
+
+            // Update UI for loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('explanation').style.display = 'none';
+            submitBtn.disabled = true;
+            document.getElementById('buttonText').textContent = 'Thinking...';
+
+            try {
+                let explanation;
+                
+                // Try AI explanation first
+                const aiResponse = await getGeminiExplanation(topic);
+                
+                if (aiResponse && aiResponse.trim().length > 20) {
+                    explanation = parseAIResponse(aiResponse, topic);
+                } else {
+                    explanation = getFallbackExplanation(topic);
+                }
+
+                displayExplanation(topic, explanation);
+                
+            } catch (error) {
+                console.error('Error getting explanation:', error);
+                showError('Something went wrong. Please try again!');
+            } finally {
+                // Reset UI
+                document.getElementById('loading').style.display = 'none';
+                submitBtn.disabled = false;
+                document.getElementById('buttonText').textContent = '✨ Get Simple Explanation';
+            }
+        }
+
+        function parseAIResponse(response, topic) {
+            // Split AI response into sections if possible
+            const paragraphs = response.split('\n\n').filter(p => p.trim());
+            
+            let main = paragraphs.slice(0, -1).join('\n\n') || response;
+            let why = "This knowledge helps broaden your understanding of the world and connects to many other interesting concepts.";
+            let examples = "Look for real-world applications of this concept in technology, nature, or daily life around you.";
+
+            // Try to extract a "why it matters" section if present
+            if (paragraphs.length > 1) {
+                const lastParagraph = paragraphs[paragraphs.length - 1];
+                if (lastParagraph.toLowerCase().includes('important') || 
+                    lastParagraph.toLowerCase().includes('matter') ||
+                    lastParagraph.toLowerCase().includes('useful') ||
+                    lastParagraph.toLowerCase().includes('application')) {
+                    why = lastParagraph;
+                    main = paragraphs.slice(0, -1).join('\n\n');
+                }
+            }
+
+            return { main, why, examples };
+        }
+
+        function displayExplanation(topic, explanation) {
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.className = 'explanation success-state';
+            explanationDiv.innerHTML = `
+                <div class="explanation-header">
+                    <span>💡</span>
+                    <span>${topic.charAt(0).toUpperCase() + topic.slice(1)}</span>
+                </div>
+                
+                <div class="explanation-content">
+                    ${explanation.main.replace(/\n/g, '<br><br>')}
+                </div>
+                
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="card-header">
+                            <span>🎯</span>
+                            <span>Why This Matters</span>
+                        </div>
+                        <div class="card-content">${explanation.why}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="card-header">
+                            <span>🌍</span>
+                            <span>In the Real World</span>
+                        </div>
+                        <div class="card-content">${explanation.examples}</div>
+                    </div>
+                </div>
+            `;
+            
+            explanationDiv.style.display = 'block';
+        }
+
+        function showError(message) {
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.className = 'explanation error-state';
+            explanationDiv.innerHTML = `
+                <div class="explanation-header">
+                    <span>⚠️</span>
+                    <span>Oops!</span>
+                </div>
+                <div class="explanation-content">${message}</div>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+        function setTopic(topic) {
+            document.getElementById('topicInput').value = topic;
+            document.getElementById('topicInput').focus();
+        }
+
+        // Enhanced enter key support
+        document.getElementById('topicInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                explainTopic();
+            }
+        });
+
+        // Auto-focus input on page load
+        window.addEventListener('load', () => {
+            document.getElementById('topicInput').focus();
+        });
+
+        // Sample topics rotation for placeholder
+        const sampleTopics = [
+            "How does the internet work?",
+            "What is DNA?",
+            "Why do we age?",
+            "How do vaccines work?",
+            "What causes gravity?",
+            "How do computers think?",
+            "What is artificial intelligence?",
+            "Why do we dream?"
+        ];
+
+        let currentSampleIndex = 0;
+        setInterval(() => {
+            const input = document.getElementById('topicInput');
+            if (!input.value && document.activeElement !== input) {
+                input.placeholder = `e.g., ${sampleTopics[currentSampleIndex]}`;
+                currentSampleIndex = (currentSampleIndex + 1) % sampleTopics.length;
+            }
+        }, 4000);
+    </script>
+</body>
+</html>
